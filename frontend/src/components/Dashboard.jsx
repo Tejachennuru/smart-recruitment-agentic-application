@@ -5,6 +5,7 @@ import JobCard from './JobCard';
 import ShareDialog from './ShareDialog';
 import ChatInterface from './ChatInterface';
 import IntervieweeDialog from './IntervieweeDialog';
+import JobDetailsModal from './JobDetailsModal';
 import ThemeToggle from './ThemeToggle';
 import RobotBadge from './RobotBadge';
 
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showIntervieweeDialog, setShowIntervieweeDialog] = useState(false);
+  const [showJobDetails, setShowJobDetails] = useState(false);
   const [shareData, setShareData] = useState(null);
 
   useEffect(() => {
@@ -50,6 +52,11 @@ export default function Dashboard() {
   const handleOpenInterviewee = (job) => {
     setSelectedJob(job);
     setShowIntervieweeDialog(true);
+  };
+
+  const handleViewJobDetails = (job) => {
+    setSelectedJob(job);
+    setShowJobDetails(true);
   };
 
   if (showChat && selectedJob) {
@@ -207,6 +214,7 @@ export default function Dashboard() {
                       job={job}
                       onOpenChat={() => handleOpenChat(job)}
                       onOpenInterviewee={() => handleOpenInterviewee(job)}
+                      onViewDetails={() => handleViewJobDetails(job)}
                       onRefresh={loadJobs}
                     />
                   </div>
@@ -240,6 +248,16 @@ export default function Dashboard() {
           job={selectedJob}
           onClose={() => {
             setShowIntervieweeDialog(false);
+            setSelectedJob(null);
+          }}
+        />
+      )}
+
+      {showJobDetails && selectedJob && (
+        <JobDetailsModal
+          job={selectedJob}
+          onClose={() => {
+            setShowJobDetails(false);
             setSelectedJob(null);
           }}
         />

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function JobCard({ job, onOpenChat, onOpenInterviewee, onRefresh }) {
+export default function JobCard({ job, onOpenChat, onOpenInterviewee, onRefresh, onViewDetails }) {
   const formatDate = (dateString) => {
     if (!dateString) return 'No deadline';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -35,7 +35,10 @@ export default function JobCard({ job, onOpenChat, onOpenInterviewee, onRefresh 
   };
 
   return (
-    <div className="card-hover group relative overflow-hidden">
+    <div 
+      className="card-hover group relative overflow-hidden cursor-pointer"
+      onClick={onViewDetails}
+    >
       {/* Gradient Background Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-transparent to-secondary-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       
@@ -127,6 +130,7 @@ export default function JobCard({ job, onOpenChat, onOpenInterviewee, onRefresh 
             href={job.google_form_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 font-semibold text-sm shadow-lg hover:shadow-glow-green transform hover:scale-105"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +142,10 @@ export default function JobCard({ job, onOpenChat, onOpenInterviewee, onRefresh 
         
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={onOpenChat}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenChat();
+            }}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 font-semibold text-sm shadow-lg hover:shadow-glow transform hover:scale-105"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +154,10 @@ export default function JobCard({ job, onOpenChat, onOpenInterviewee, onRefresh 
             Chat
           </button>
           <button
-            onClick={onOpenInterviewee}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenInterviewee();
+            }}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-secondary-500 to-secondary-600 text-white rounded-xl hover:from-secondary-600 hover:to-secondary-700 transition-all duration-300 font-semibold text-sm shadow-lg hover:shadow-glow-purple transform hover:scale-105"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
