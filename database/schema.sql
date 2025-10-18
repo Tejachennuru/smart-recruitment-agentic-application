@@ -100,3 +100,78 @@ CREATE TRIGGER update_jobs_updated_at BEFORE UPDATE ON jobs
 
 CREATE TRIGGER update_interview_reports_updated_at BEFORE UPDATE ON interview_reports
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- RAG: Enable pgvector extension for embeddings
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- RAG: Table to store application content chunks with embeddings
+-- Using 1536 dims for OpenAI text-embedding-3-small
+CREATE TABLE IF NOT EXISTS application_chunks (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
+        applicant_email VARCHAR(255),
+        applicant_name VARCHAR(255),
+        content TEXT NOT NULL,
+        metadata JSONB DEFAULT '{}',
+        embedding VECTOR(1536)
+);
+
+-- Optional: speed up similarity search with IVFFlat index (requires ANALYZE)
+-- Adjust lists parameter depending on data size
+CREATE INDEX IF NOT EXISTS application_chunks_embedding_ivfflat ON application_chunks USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS application_chunks_job_id_idx ON application_chunks(job_id);
+
+-- Dedupe: add content_hash and unique constraint across job_id, applicant_email, content_hash
+ALTER TABLE application_chunks
+    ADD COLUMN IF NOT EXISTS content_hash TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_application_chunks ON application_chunks(job_id, COALESCE(applicant_email, ''), content_hash);
+
+-- RAG: RPC to perform similarity search with optional filter by job_id
+CREATE OR REPLACE FUNCTION match_application_chunks(
+    query_embedding vector(1536),
+    match_count int DEFAULT 5,
+    filter jsonb DEFAULT '{}'
+)
+RETURNS TABLE (
+    id uuid,
+    job_id uuid,
+    applicant_email text,
+    applicant_name text,
+    content text,
+    metadata jsonb,
+    similarity float
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT ac.id,
+                 ac.job_id,
+                 ac.applicant_email,
+                 ac.applicant_name,
+                 ac.content,
+                 ac.metadata,
+                 1 - (ac.embedding <=> query_embedding) AS similarity
+    FROM application_chunks ac
+    WHERE (
+        filter IS NULL OR filter = '{}'::jsonb OR (
+            (filter ? 'job_id' AND ac.job_id::text = filter->>'job_id')
+        )
+    )
+    ORDER BY ac.embedding <=> query_embedding
+    LIMIT match_count;
+END;
+$$;
+
+-- RAG feedback table
+CREATE TABLE IF NOT EXISTS rag_feedback (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    helpful BOOLEAN,
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+    notes TEXT,
+    sources JSONB DEFAULT '[]',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

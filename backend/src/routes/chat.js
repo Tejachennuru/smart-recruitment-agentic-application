@@ -7,7 +7,7 @@ const router = express.Router();
 // Get chat history for a job
 router.get('/:jobId', requireHRAuth, async (req, res) => {
   try {
-    const { data: messages, error } = await supabase
+    const { data: messages, error } = await supabaseAdmin
       .from('chat_messages')
       .select('*')
       .eq('job_id', req.params.jobId)
@@ -43,7 +43,7 @@ router.post('/:jobId', requireHRAuth, async (req, res) => {
     }
 
     // Get job details for context
-    const { data: job, error: jobError } = await supabase
+    const { data: job, error: jobError } = await supabaseAdmin
       .from('jobs')
       .select('*, candidates(*), interview_reports(*)')
       .eq('id', jobId)
@@ -57,7 +57,7 @@ router.post('/:jobId', requireHRAuth, async (req, res) => {
     }
 
     // Save user message
-    const { data: userMessage, error: userMsgError } = await supabase
+    const { data: userMessage, error: userMsgError } = await supabaseAdmin
       .from('chat_messages')
       .insert({
         job_id: jobId,
@@ -100,7 +100,7 @@ Based on the job posting for ${job.job_title}:
 What specific information would you like to know?`;
 
     // Save AI response
-    const { data: assistantMessage, error: assistantMsgError } = await supabase
+    const { data: assistantMessage, error: assistantMsgError } = await supabaseAdmin
       .from('chat_messages')
       .insert({
         job_id: jobId,
@@ -135,7 +135,7 @@ What specific information would you like to know?`;
 // Clear chat history
 router.delete('/:jobId', requireHRAuth, async (req, res) => {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('chat_messages')
       .delete()
       .eq('job_id', req.params.jobId);

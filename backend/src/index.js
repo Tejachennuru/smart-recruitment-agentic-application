@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import jobsRouter from './routes/jobs.js';
 import interviewRouter from './routes/interview.js';
 import chatRouter from './routes/chat.js';
+import ragRouter from './routes/rag.js';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.get('/health', (req, res) => {
 app.use('/api/jobs', jobsRouter);
 app.use('/api/interview', interviewRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/rag', ragRouter);
 
 // Error handling
 app.use((err, req, res, next) => {

@@ -49,4 +49,17 @@ export const chatAPI = {
   clearHistory: (jobId) => api.delete(`/api/chat/${jobId}`)
 };
 
+// RAG API
+export const ragAPI = {
+  // file: a File object from <input type="file"/>
+  uploadExcel: (jobId, file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post(`/api/rag/upload/${jobId}`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  ask: (jobId, question) => api.post(`/api/rag/ask/${jobId}`, { question }),
+};
+
 export default api;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { chatAPI } from '../services/api';
+import { chatAPI, ragAPI } from '../services/api';
+import UploadApplications from './UploadApplications';
 
 export default function ChatInterface({ job }) {
   const [messages, setMessages] = useState([]);
@@ -40,7 +41,8 @@ export default function ChatInterface({ job }) {
     setLoading(true);
 
     try {
-      const response = await chatAPI.sendMessage(job.id, userMessage);
+      // Use RAG endpoint so assistant is RAG-powered and returns sources
+      const response = await ragAPI.ask(job.id, userMessage);
       setMessages(prev => [
         ...prev,
         response.data.userMessage,
@@ -87,6 +89,7 @@ export default function ChatInterface({ job }) {
         </div>
         
         <div className="space-y-6">
+          <UploadApplications job={job} />
           <div className="glass p-4 rounded-xl">
             <h3 className="font-display font-bold text-dark-900 mb-2">{job.job_title}</h3>
             <p className="text-sm text-dark-600 leading-relaxed">{job.description}</p>
@@ -271,6 +274,63 @@ export default function ChatInterface({ job }) {
                       <p className="text-xs mt-3 opacity-70">
                         {new Date(message.created_at).toLocaleTimeString()}
                       </p>
+                      {message.role === 'assistant' && message.metadata?.sources && message.metadata.sources.length > 0 && (
+                        <div className="mt-3 border-t border-white/20 pt-3">
+                          <h5 className="text-xs font-semibold text-dark-500 mb-2">Sources</h5>
+                          <ul className="space-y-2">
+                            {message.metadata.sources.map((s, i) => (
+                              <li key={i} className="text-xs text-dark-600 bg-white/5 rounded p-2">
+                                <span className="font-medium text-dark-700">{s.applicant_name || s.applicant_email || 'Unknown Applicant'}:</span>
+                                <span className="ml-2">{s.snippet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="flex items-center gap-2 mt-3">
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/rag/feedback/${job.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'x-hr-token': import.meta.env.VITE_HR_TOKEN,
+                                    },
+                                    body: JSON.stringify({
+                                      question: messages[messages.length - 1]?.content || '',
+                                      answer: message.content,
+                                      helpful: true,
+                                      rating: 5,
+                                      sources: message.metadata.sources,
+                                    }),
+                                  });
+                                } catch {}
+                              }}
+                              className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-600 hover:bg-green-500/30"
+                            >👍 Helpful</button>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/rag/feedback/${job.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'x-hr-token': import.meta.env.VITE_HR_TOKEN,
+                                    },
+                                    body: JSON.stringify({
+                                      question: messages[messages.length - 1]?.content || '',
+                                      answer: message.content,
+                                      helpful: false,
+                                      rating: 1,
+                                      sources: message.metadata.sources,
+                                    }),
+                                  });
+                                } catch {}
+                              }}
+                              className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-600 hover:bg-red-500/30"
+                            >👎 Not helpful</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
