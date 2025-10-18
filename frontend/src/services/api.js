@@ -22,11 +22,11 @@ api.interceptors.response.use(
 
 // Jobs API
 export const jobsAPI = {
-  create: (jobData) => api.post('/api/jobs', jobData),
-  getAll: () => api.get('/api/jobs'),
-  getById: (id) => api.get(`/api/jobs/${id}`),
-  update: (id, data) => api.patch(`/api/jobs/${id}`, data),
-  delete: (id) => api.delete(`/api/jobs/${id}`)
+  create: async (jobData) => (await api.post('/api/jobs', jobData)).data,
+  getAll: async () => (await api.get('/api/jobs')).data,
+  getById: async (id) => (await api.get(`/api/jobs/${id}`)).data,
+  update: async (id, data) => (await api.patch(`/api/jobs/${id}`, data)).data,
+  delete: async (id) => (await api.delete(`/api/jobs/${id}`)).data
 };
 
 // Interview API

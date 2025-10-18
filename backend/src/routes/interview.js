@@ -1,5 +1,5 @@
 import express from 'express';
-import { supabase } from '../config/supabase.js';
+import { supabaseAdmin } from '../config/supabase.js';
 import { createInterviewToken, validateInterviewToken } from '../services/tokenService.js';
 import { sendInterviewInvite } from '../services/emailService.js';
 import { requireHRAuth } from '../middleware/auth.js';

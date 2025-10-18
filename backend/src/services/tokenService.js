@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { supabase } from '../config/supabase.js';
+import { supabaseAdmin } from '../config/supabase.js';
 
 export const generateSecureToken = () => {
   return crypto.randomBytes(32).toString('hex');

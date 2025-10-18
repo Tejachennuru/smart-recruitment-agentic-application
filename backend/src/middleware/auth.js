@@ -1,13 +1,13 @@
 export const requireHRAuth = (req, res, next) => {
   const token = req.headers['x-hr-token'];
-  
+
   if (!token || token !== process.env.HR_TOKEN) {
-    return res.status(401).json({ 
-      success: false, 
-      error: 'Unauthorized. Valid HR token required.' 
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized. Valid HR token required.'
     });
   }
-  
+
   next();
 };
 

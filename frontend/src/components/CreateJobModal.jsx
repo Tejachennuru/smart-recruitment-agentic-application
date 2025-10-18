@@ -43,8 +43,8 @@ export default function CreateJobModal({ onClose, onSuccess }) {
         candidates_needed: parseInt(formData.candidates_needed) || 1
       };
 
-      const response = await jobsAPI.create(payload);
-      onSuccess(response.data);
+      const response = await jobsAPI.create(payload); // returns { success, job, googleForm, whatsappMessage }
+      onSuccess(response.job); // pass the job back to parent
     } catch (error) {
       console.error('Failed to create job:', error);
       alert(`Failed to create job: ${error.response?.data?.error || error.message}`);
