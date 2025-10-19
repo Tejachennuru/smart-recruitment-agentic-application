@@ -1,11 +1,12 @@
 # 🤖 Smart Recruitment Agent
 
-An AI-powered recruitment platform that uses RAG (Retrieval-Augmented Generation) to help HR teams analyze job applications, conduct intelligent searches, and make data-driven hiring decisions.
+An AI-powered recruitment platform that uses RAG (Retrieval-Augmented Generation) to help HR teams analyze job applications, form generation based on data points, conduct intelligent searches, and make data-driven hiring decisions.
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
 - **RAG-Powered Chat**: Ask questions about candidates using natural language
+- **Google Form Generation**: Based on input, Agent generates the google form for applicants
 - **Smart Application Analysis**: Upload Excel/CSV files with candidate data
 - **Vector Search**: Semantic search across all applications using embeddings
 - **Multi-Format Support**: Excel (.xlsx), CSV, and Google Sheets integration
